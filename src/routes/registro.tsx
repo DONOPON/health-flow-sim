@@ -19,7 +19,7 @@ function RegistroPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rol, setRol] = useState<"paciente" | "doctor">("paciente");
-  const [especialidad, setEspecialidad] = useState(ESPECIALIDADES[0]);
+  const [especialidad, setEspecialidad] = useState<string>(ESPECIALIDADES[0]);
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
