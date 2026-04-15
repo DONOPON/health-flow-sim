@@ -59,7 +59,10 @@ const SEED_CITAS: Cita[] = [
 ];
 
 // localStorage helpers
+const isBrowser = typeof window !== "undefined";
+
 function initData() {
+  if (!isBrowser) return;
   if (!localStorage.getItem("usuarios")) {
     localStorage.setItem("usuarios", JSON.stringify([...SEED_DOCTORS, SEED_PATIENT]));
   }
@@ -69,29 +72,35 @@ function initData() {
 }
 
 export function getUsuarios(): Usuario[] {
+  if (!isBrowser) return [...SEED_DOCTORS, SEED_PATIENT];
   initData();
   return JSON.parse(localStorage.getItem("usuarios") || "[]");
 }
 
 export function setUsuarios(usuarios: Usuario[]) {
+  if (!isBrowser) return;
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
 }
 
 export function getCitas(): Cita[] {
+  if (!isBrowser) return [];
   initData();
   return JSON.parse(localStorage.getItem("citas") || "[]");
 }
 
 export function setCitas(citas: Cita[]) {
+  if (!isBrowser) return;
   localStorage.setItem("citas", JSON.stringify(citas));
 }
 
 export function getSesion(): Usuario | null {
+  if (!isBrowser) return null;
   const s = localStorage.getItem("sesionActual");
   return s ? JSON.parse(s) : null;
 }
 
 export function setSesion(u: Usuario | null) {
+  if (!isBrowser) return;
   if (u) localStorage.setItem("sesionActual", JSON.stringify(u));
   else localStorage.removeItem("sesionActual");
 }
