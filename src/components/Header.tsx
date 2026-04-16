@@ -67,7 +67,7 @@ export function Header() {
           <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="rounded-md px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+              className="rounded-md bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:scale-105"
             >
               Iniciar sesión
             </Link>
