@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Heart, Stethoscope, UserCheck, Shield, ArrowRight } from "lucide-react";
+import { Heart, Stethoscope, UserCheck, Shield, ArrowRight, Users, UserPlus, Wifi } from "lucide-react";
 import { getSesion } from "@/lib/data";
+import { useState, useEffect, useCallback } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,9 +15,26 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const sliderImages = [
+  "https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?auto=format&fit=crop&w=1920&q=80",
+  "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1920&q=80",
+  "https://images.unsplash.com/photo-1666214280577-5765a8a4ae26?auto=format&fit=crop&w=1920&q=80",
+  "https://images.unsplash.com/photo-1551190822-a9ce113ac100?auto=format&fit=crop&w=1920&q=80",
+];
+
 function Index() {
   const navigate = useNavigate();
   const sesion = getSesion();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 7000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
 
   if (sesion) {
     if (sesion.rol === "paciente") navigate({ to: "/dashboard-paciente" });
@@ -25,35 +43,92 @@ function Index() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Hero */}
-      <div className="health-gradient px-4 py-20 text-center">
-        <div className="mx-auto max-w-3xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary-foreground/20 px-4 py-2 text-sm text-primary-foreground">
-            <Heart className="h-4 w-4" />
-            Portal de Salud Digital
+    <div className="min-h-screen bg-background">
+      {/* Hero with Image Slider */}
+      <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Slider images */}
+        {sliderImages.map((src, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            style={{ opacity: i === currentSlide ? 1 : 0 }}
+          >
+            <img
+              src={src}
+              alt={`Imagen médica ${i + 1}`}
+              className="h-full w-full object-cover"
+              loading={i === 0 ? "eager" : "lazy"}
+            />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl">
-            Tu salud, centralizada y accesible
-          </h1>
-          <p className="mt-4 text-lg text-primary-foreground/80">
-            Agenda citas, consulta tu historial clínico y descarga tus diagnósticos. Todo en un solo lugar.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/registro"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-            >
-              Crear cuenta
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-primary-foreground/30 px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground/10"
-            >
-              Iniciar sesión
-            </Link>
+        ))}
+
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/55" />
+
+        {/* Hero content */}
+        <div className="relative z-10 px-4 py-24 text-center">
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm text-white backdrop-blur-sm">
+              <Heart className="h-4 w-4" />
+              Portal de Salud Digital
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Tu salud, centralizada y accesible
+            </h1>
+            <p className="mt-4 text-lg text-white/85">
+              Agenda citas, consulta tu historial clínico y descarga tus diagnósticos. Todo en un solo lugar.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                to="/registro"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-primary shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+              >
+                Crear cuenta
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 rounded-xl border-2 border-white/40 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Iniciar sesión
+              </Link>
+            </div>
           </div>
+        </div>
+
+        {/* Slider dots */}
+        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+          {sliderImages.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                i === currentSlide ? "w-8 bg-white" : "w-2.5 bg-white/50"
+              }`}
+              aria-label={`Ir a imagen ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Stats / Trust section */}
+      <div className="bg-primary px-4 py-10">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-8 sm:gap-16">
+          {[
+            { icon: Users, value: "500+", label: "Pacientes atendidos" },
+            { icon: UserPlus, value: "20+", label: "Médicos registrados" },
+            { icon: Wifi, value: "100%", label: "Digital" },
+          ].map((stat, i) => (
+            <div key={i} className="flex items-center gap-3 text-primary-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
+                <stat.icon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stat.value}</p>
+                <p className="text-sm text-white/75">{stat.label}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -76,6 +151,23 @@ function Index() {
               <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* CTA section */}
+      <div className="bg-primary px-4 py-16 text-center">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="text-3xl font-bold text-white">¿Listo para empezar?</h2>
+          <p className="mt-3 text-lg text-white/80">
+            Únete a cientos de pacientes que ya gestionan su salud de forma digital.
+          </p>
+          <Link
+            to="/registro"
+            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+          >
+            Crear mi cuenta gratis
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
 
