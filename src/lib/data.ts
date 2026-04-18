@@ -134,11 +134,15 @@ export function getDoctorById(id: number): Usuario | undefined {
   return getUsuarios().find((u) => u.id === id && u.rol === "doctor");
 }
 
-export function setFavorito(pacienteId: number, doctorId: number) {
+export function setFavorito(pacienteId: number, doctorId: number | undefined) {
   const usuarios = getUsuarios();
   const i = usuarios.findIndex((u) => u.id === pacienteId);
   if (i !== -1) {
-    usuarios[i].favorito = doctorId;
+    if (doctorId === undefined) {
+      delete usuarios[i].favorito;
+    } else {
+      usuarios[i].favorito = doctorId;
+    }
     setUsuarios(usuarios);
     setSesion(usuarios[i]);
   }
