@@ -38,7 +38,8 @@ function DashboardPaciente() {
   const doctores = getDoctores();
 
   const handleFavorito = (doctorId: number) => {
-    setFavorito(sesion.id, doctorId);
+    const nuevo = sesion?.favorito === doctorId ? undefined : doctorId;
+    setFavorito(sesion!.id, nuevo);
     setSesionState(getSesion());
   };
 
