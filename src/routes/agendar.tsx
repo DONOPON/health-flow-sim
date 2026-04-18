@@ -1,8 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { getSesion, getDoctores, ESPECIALIDADES, agendarCita } from "@/lib/data";
+import { useState, useEffect, useMemo } from "react";
+import { getSesion, getDoctores, ESPECIALIDADES, agendarCita, getCitas } from "@/lib/data";
 
-import { Calendar, Search, CheckCircle2 } from "lucide-react";
+import { Calendar, Search, CheckCircle2, Clock, Ban } from "lucide-react";
+
+// Genera slots de 08:00 a 18:00 cada 30 minutos
+const SLOTS_HORA: string[] = (() => {
+  const slots: string[] = [];
+  for (let h = 8; h < 18; h++) {
+    slots.push(`${String(h).padStart(2, "0")}:00`);
+    slots.push(`${String(h).padStart(2, "0")}:30`);
+  }
+  return slots;
+})();
 
 export const Route = createFileRoute("/agendar")({
   head: () => ({
@@ -33,6 +43,27 @@ function AgendarPage() {
     if (!s || s.rol !== "paciente") navigate({ to: "/login" });
   }, [navigate]);
 
+  // Calcula horarios ocupados del médico en la fecha seleccionada
+  const horariosOcupados = useMemo(() => {
+    if (!doctorId || !fecha) return new Set<string>();
+    const citas = getCitas();
+    return new Set(
+      citas
+        .filter(
+          (c) =>
+            c.doctorId === Number(doctorId) &&
+            c.fecha === fecha &&
+            c.estado !== "Cancelada",
+        )
+        .map((c) => c.hora),
+    );
+  }, [doctorId, fecha]);
+
+  // Resetea hora si la fecha o el doctor cambian
+  useEffect(() => {
+    setHora("");
+  }, [doctorId, fecha]);
+
   if (!sesion) return null;
 
   const doctores = getDoctores();
@@ -43,6 +74,7 @@ function AgendarPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!doctorId || !fecha || !hora || !motivo) return;
+    if (horariosOcupados.has(hora)) return;
     agendarCita(sesion.id, Number(doctorId), fecha, hora, motivo);
     setExito(true);
     setTimeout(() => navigate({ to: "/dashboard-paciente" }), 2000);
@@ -98,15 +130,65 @@ function AgendarPage() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Fecha *</label>
-                <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Fecha *</label>
+              <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required min={new Date().toISOString().split("T")[0]} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+            </div>
+
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-sm font-medium text-foreground">Hora *</label>
+                {doctorId && fecha && (
+                  <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-success" />Disponible</span>
+                    <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground/40" />Ocupado</span>
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Hora *</label>
-                <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} required className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-              </div>
+
+              {!doctorId || !fecha ? (
+                <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-4 text-xs text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  Selecciona médico y fecha para ver horarios disponibles
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                    {SLOTS_HORA.map((slot) => {
+                      const ocupado = horariosOcupados.has(slot);
+                      const seleccionado = hora === slot;
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          disabled={ocupado}
+                          onClick={() => setHora(slot)}
+                          title={ocupado ? "Horario no disponible" : `Disponible: ${slot}`}
+                          className={
+                            seleccionado
+                              ? "rounded-lg border-2 border-primary bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground shadow-sm"
+                              : ocupado
+                                ? "flex cursor-not-allowed items-center justify-center gap-1 rounded-lg border border-border bg-muted/50 px-2 py-2 text-xs text-muted-foreground line-through opacity-60"
+                                : "rounded-lg border border-success/40 bg-success/10 px-2 py-2 text-xs font-medium text-success transition-colors hover:border-success hover:bg-success/20"
+                          }
+                        >
+                          {ocupado ? (
+                            <><Ban className="inline h-3 w-3" />{slot}</>
+                          ) : (
+                            slot
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {hora && horariosOcupados.has(hora) && (
+                    <p className="mt-2 text-xs text-destructive">Horario no disponible, elige otro.</p>
+                  )}
+                  {!hora && (
+                    <p className="mt-2 text-xs text-muted-foreground">Toca un horario en verde para seleccionarlo.</p>
+                  )}
+                </>
+              )}
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">Motivo de consulta *</label>
