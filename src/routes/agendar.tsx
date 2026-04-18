@@ -43,21 +43,6 @@ function AgendarPage() {
     if (!s || s.rol !== "paciente") navigate({ to: "/login" });
   }, [navigate]);
 
-  if (!sesion) return null;
-
-  const doctores = getDoctores();
-  const doctoresFiltrados = especialidad
-    ? doctores.filter((d) => d.especialidad_principal === especialidad)
-    : doctores;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!doctorId || !fecha || !hora || !motivo) return;
-    agendarCita(sesion.id, Number(doctorId), fecha, hora, motivo);
-    setExito(true);
-    setTimeout(() => navigate({ to: "/dashboard-paciente" }), 2000);
-  };
-
   // Calcula horarios ocupados del médico en la fecha seleccionada
   const horariosOcupados = useMemo(() => {
     if (!doctorId || !fecha) return new Set<string>();
@@ -78,6 +63,13 @@ function AgendarPage() {
   useEffect(() => {
     setHora("");
   }, [doctorId, fecha]);
+
+  if (!sesion) return null;
+
+  const doctores = getDoctores();
+  const doctoresFiltrados = especialidad
+    ? doctores.filter((d) => d.especialidad_principal === especialidad)
+    : doctores;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
