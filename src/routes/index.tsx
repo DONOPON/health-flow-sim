@@ -154,23 +154,6 @@ function Index() {
         </div>
       </div>
 
-      {/* CTA section */}
-      <div className="bg-primary px-4 py-16 text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold text-white">¿Listo para empezar?</h2>
-          <p className="mt-3 text-lg text-white/80">
-            Únete a cientos de pacientes que ya gestionan su salud de forma digital.
-          </p>
-          <Link
-            to="/registro"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-          >
-            Crear mi cuenta gratis
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-
       {/* Footer */}
       <footer className="border-t border-border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
         <p>SaludDigital — Prototipo funcional de Portal de Salud Digital</p>
