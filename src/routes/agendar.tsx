@@ -1,8 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { getSesion, getDoctores, ESPECIALIDADES, agendarCita } from "@/lib/data";
+import { useState, useEffect, useMemo } from "react";
+import { getSesion, getDoctores, ESPECIALIDADES, agendarCita, getCitas } from "@/lib/data";
 
-import { Calendar, Search, CheckCircle2 } from "lucide-react";
+import { Calendar, Search, CheckCircle2, Clock, Ban } from "lucide-react";
+
+// Genera slots de 08:00 a 18:00 cada 30 minutos
+const SLOTS_HORA: string[] = (() => {
+  const slots: string[] = [];
+  for (let h = 8; h < 18; h++) {
+    slots.push(`${String(h).padStart(2, "0")}:00`);
+    slots.push(`${String(h).padStart(2, "0")}:30`);
+  }
+  return slots;
+})();
 
 export const Route = createFileRoute("/agendar")({
   head: () => ({
