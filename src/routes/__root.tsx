@@ -1,5 +1,6 @@
-import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
+import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
@@ -23,8 +24,31 @@ function NotFoundComponent() {
   );
 }
 
+function RootShell({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="es">
+      <head>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SaludDigital - Portal de Salud Digital</title>
+        <meta
+          name="description"
+          content="Tu portal de salud digital. Agenda citas, consulta tu historial clínico y descarga tus diagnósticos."
+        />
+        <link rel="stylesheet" href={appCss} />
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
 export const Route = createRootRoute({
   component: RootComponent,
+  shellComponent: RootShell,
   notFoundComponent: NotFoundComponent,
 });
 
