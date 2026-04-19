@@ -27,7 +27,7 @@ const sandboxConfig = lovableDefineConfig({
 });
 
 const staticSpaConfig = viteDefineConfig(({ command }) => ({
-  base: command === "build" ? "/portal-salud/" : "/",
+  base: command === "build" ? "/health-flow-sim/" : "/",
   plugins: [...sharedPlugins, react()],
   build: {
     outDir: "dist",
