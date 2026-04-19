@@ -1,4 +1,4 @@
-import { createRouter, useRouter, createHashHistory } from "@tanstack/react-router";
+import { createRouter, useRouter, createHashHistory, createMemoryHistory } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
@@ -58,7 +58,12 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: {},
-    history: createHashHistory(),
+    // On the server (SSR) window is undefined; use memory history there.
+    // In the browser use hash history so the static SPA on GitHub Pages works under any base path.
+    history:
+      typeof window === "undefined"
+        ? createMemoryHistory({ initialEntries: ["/"] })
+        : createHashHistory(),
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
