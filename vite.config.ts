@@ -4,8 +4,8 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig({
-  base: "/health-flow-sim/",
+export default defineConfig(({ command }) => ({
+  base: command === "build" ? "/health-flow-sim/" : "/",
   plugins: [
     tsconfigPaths(),
     TanStackRouterVite({
@@ -21,4 +21,4 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
   },
-});
+}));
