@@ -34,14 +34,10 @@ jobs:
           ls -la
           echo "---- dist ----"
           ls -la dist || true
-          echo "---- dist/assets ----"
-          ls -la dist/assets || true
-          echo "---- .output ----"
-          ls -la .output || true
-          echo "---- .output/public ----"
-          ls -la .output/public || true
-          echo "---- build ----"
-          ls -la build || true
+          echo "---- dist/client ----"
+          ls -la dist/client || true
+          echo "---- dist/server ----"
+          ls -la dist/server || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
