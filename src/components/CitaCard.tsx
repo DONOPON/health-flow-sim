@@ -1,14 +1,15 @@
 import { type Cita, getDoctorById, getUsuarios } from "@/lib/data";
-import { Calendar, Clock, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, Clock, FileText, CheckCircle2, AlertCircle, Pill } from "lucide-react";
 
 interface CitaCardProps {
   cita: Cita;
   viewAs: "paciente" | "doctor";
   onDiagnosticar?: (cita: Cita) => void;
+  onDescargarReceta?: (cita: Cita) => void;
   onDescargarPDF?: (cita: Cita) => void;
 }
 
-export function CitaCard({ cita, viewAs, onDiagnosticar, onDescargarPDF }: CitaCardProps) {
+export function CitaCard({ cita, viewAs, onDiagnosticar, onDescargarReceta, onDescargarPDF }: CitaCardProps) {
   const doctor = getDoctorById(cita.doctorId);
   const usuarios = getUsuarios();
   const paciente = usuarios.find((u) => u.id === cita.pacienteId);
@@ -20,6 +21,10 @@ export function CitaCard({ cita, viewAs, onDiagnosticar, onDescargarPDF }: CitaC
       : "bg-primary/10 text-primary";
 
   const EstadoIcon = cita.estado === "Finalizada" ? CheckCircle2 : AlertCircle;
+
+  // El paciente NO debe ver diagnóstico, observaciones ni imágenes clínicas.
+  const mostrarHistorialClinico = viewAs === "doctor";
+  const mostrarReceta = viewAs === "paciente" && cita.receta;
 
   return (
     <div className="health-card border border-border p-5">
@@ -54,7 +59,7 @@ export function CitaCard({ cita, viewAs, onDiagnosticar, onDescargarPDF }: CitaC
               {cita.hora}
             </span>
           </div>
-          {cita.diagnostico && (
+          {mostrarHistorialClinico && cita.diagnostico && (
             <div className="mt-3 rounded-md bg-muted p-3">
               <p className="text-sm font-medium text-foreground">Diagnóstico:</p>
               <p className="mt-1 text-sm text-muted-foreground">{cita.diagnostico}</p>
@@ -63,12 +68,33 @@ export function CitaCard({ cita, viewAs, onDiagnosticar, onDescargarPDF }: CitaC
               )}
             </div>
           )}
+          {mostrarHistorialClinico && cita.receta && (
+            <div className="mt-3 rounded-md border border-accent/30 bg-accent/5 p-3">
+              <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <Pill className="h-3.5 w-3.5 text-accent" />
+                Receta entregada:
+              </p>
+              <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{cita.receta}</p>
+            </div>
+          )}
+          {mostrarReceta && (
+            <div className="mt-3 rounded-md border border-accent/30 bg-accent/5 p-3">
+              <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <Pill className="h-3.5 w-3.5 text-accent" />
+                Receta médica:
+              </p>
+              <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{cita.receta}</p>
+            </div>
+          )}
+          {viewAs === "paciente" && cita.estado === "Finalizada" && !cita.receta && (
+            <p className="mt-3 text-xs italic text-muted-foreground">El médico no emitió receta para esta consulta.</p>
+          )}
         </div>
-        {cita.imagen && (
+        {mostrarHistorialClinico && cita.imagen && (
           <img src={cita.imagen} alt="Imagen médica" className="ml-4 h-16 w-16 rounded-lg object-cover" />
         )}
       </div>
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {viewAs === "doctor" && cita.estado === "Pendiente" && onDiagnosticar && (
           <button
             onClick={() => onDiagnosticar(cita)}
@@ -77,13 +103,22 @@ export function CitaCard({ cita, viewAs, onDiagnosticar, onDescargarPDF }: CitaC
             Diagnosticar
           </button>
         )}
-        {viewAs === "paciente" && cita.estado === "Finalizada" && onDescargarPDF && (
+        {viewAs === "doctor" && cita.estado === "Finalizada" && onDescargarPDF && (
           <button
             onClick={() => onDescargarPDF(cita)}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+            className="flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
           >
             <FileText className="h-4 w-4" />
-            Descargar PDF
+            PDF historial
+          </button>
+        )}
+        {viewAs === "paciente" && cita.estado === "Finalizada" && cita.receta && onDescargarReceta && (
+          <button
+            onClick={() => onDescargarReceta(cita)}
+            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+          >
+            <Pill className="h-4 w-4" />
+            Descargar receta (PDF)
           </button>
         )}
       </div>
