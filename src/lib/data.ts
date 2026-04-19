@@ -19,6 +19,7 @@ export interface Cita {
   diagnostico?: string;
   observaciones?: string;
   imagen?: string;
+  receta?: string;
   estado: "Pendiente" | "Finalizada" | "Cancelada";
 }
 
@@ -53,7 +54,7 @@ const SEED_PATIENT: Usuario = {
 };
 
 const SEED_CITAS: Cita[] = [
-  { id: 1, pacienteId: 100, doctorId: 1, fecha: "2026-04-10", hora: "09:00", motivo: "Control cardíaco", diagnostico: "Presión arterial elevada. Se recomienda dieta baja en sodio y seguimiento en 30 días.", observaciones: "Paciente presenta estrés laboral.", imagen: "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400", estado: "Finalizada" },
+  { id: 1, pacienteId: 100, doctorId: 1, fecha: "2026-04-10", hora: "09:00", motivo: "Control cardíaco", diagnostico: "Presión arterial elevada. Se recomienda dieta baja en sodio y seguimiento en 30 días.", observaciones: "Paciente presenta estrés laboral.", imagen: "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400", receta: "Losartán 50mg — 1 comprimido cada 24h por 30 días.\nAcido acetilsalicílico 100mg — 1 comprimido al día tras el almuerzo.\nDieta hiposódica y caminar 30 min diarios.", estado: "Finalizada" },
   { id: 2, pacienteId: 100, doctorId: 2, fecha: "2026-04-15", hora: "10:30", motivo: "Chequeo general", estado: "Pendiente" },
   { id: 3, pacienteId: 100, doctorId: 3, fecha: "2026-04-20", hora: "14:00", motivo: "Revisión dermatológica", estado: "Pendiente" },
 ];
@@ -148,13 +149,14 @@ export function setFavorito(pacienteId: number, doctorId: number | undefined) {
   }
 }
 
-export function guardarDiagnostico(citaId: number, diagnostico: string, observaciones: string, imagen: string) {
+export function guardarDiagnostico(citaId: number, diagnostico: string, observaciones: string, imagen: string, receta: string) {
   const citas = getCitas();
   const i = citas.findIndex((c) => c.id === citaId);
   if (i !== -1) {
     citas[i].diagnostico = diagnostico;
     citas[i].observaciones = observaciones;
     citas[i].imagen = imagen;
+    citas[i].receta = receta;
     citas[i].estado = "Finalizada";
     setCitas(citas);
   }

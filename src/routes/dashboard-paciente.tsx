@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getSesion, getCitas, setFavorito, getDoctores, type Cita } from "@/lib/data";
-import { generarPDFDiagnostico } from "@/lib/pdf";
+import { generarPDFReceta } from "@/lib/pdf";
 
 import { FavoriteDoctorCard } from "@/components/FavoriteDoctorCard";
 import { CitaCard } from "@/components/CitaCard";
-import { Calendar, ClipboardList, Star, Plus } from "lucide-react";
+import { Calendar, Pill, Star, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard-paciente")({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/dashboard-paciente")({
 function DashboardPaciente() {
   const navigate = useNavigate();
   const [sesion, setSesionState] = useState(getSesion());
-  const [tab, setTab] = useState<"proximas" | "historial">("proximas");
+  const [tab, setTab] = useState<"proximas" | "recetas">("proximas");
 
   useEffect(() => {
     const s = getSesion();
@@ -34,7 +34,7 @@ function DashboardPaciente() {
 
   const citas = getCitas().filter((c) => c.pacienteId === sesion.id);
   const citasProximas = citas.filter((c) => c.estado === "Pendiente");
-  const historial = citas.filter((c) => c.estado === "Finalizada");
+  const recetas = citas.filter((c) => c.estado === "Finalizada");
   const doctores = getDoctores();
 
   const handleFavorito = (doctorId: number) => {
@@ -43,8 +43,8 @@ function DashboardPaciente() {
     setSesionState(getSesion());
   };
 
-  const handleDescargarPDF = (cita: Cita) => {
-    generarPDFDiagnostico(cita);
+  const handleDescargarReceta = (cita: Cita) => {
+    generarPDFReceta(cita);
   };
 
   return (
@@ -69,7 +69,7 @@ function DashboardPaciente() {
         <div className="mb-8 grid grid-cols-3 gap-4">
           {[
             { icon: Calendar, label: "Citas pendientes", value: citasProximas.length, color: "text-primary" },
-            { icon: ClipboardList, label: "Consultas realizadas", value: historial.length, color: "text-success" },
+            { icon: Pill, label: "Recetas disponibles", value: recetas.filter((c) => c.receta).length, color: "text-success" },
             { icon: Star, label: "Médico favorito", value: sesion.favorito ? "Sí" : "No", color: "text-accent" },
           ].map((s, i) => (
             <div key={i} className="health-card border border-border p-4 text-center">
@@ -87,7 +87,7 @@ function DashboardPaciente() {
 
         {/* Tabs */}
         <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
-          {([["proximas", "Próximas citas"], ["historial", "Historial clínico"]] as const).map(([key, label]) => (
+          {([["proximas", "Próximas citas"], ["recetas", "Mis recetas"]] as const).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setTab(key)}
@@ -118,16 +118,19 @@ function DashboardPaciente() {
               ))}
             </>
           )}
-          {tab === "historial" && (
+          {tab === "recetas" && (
             <>
-              {historial.length === 0 && (
+              <p className="mb-2 text-xs text-muted-foreground">
+                Por privacidad, solo se muestran las recetas e indicaciones que tu médico te entregó. El historial clínico completo solo es accesible por el doctor.
+              </p>
+              {recetas.length === 0 && (
                 <div className="py-12 text-center text-muted-foreground">
-                  <ClipboardList className="mx-auto mb-3 h-10 w-10" />
-                  <p>Aún no tienes consultas finalizadas</p>
+                  <Pill className="mx-auto mb-3 h-10 w-10" />
+                  <p>Aún no tienes recetas disponibles</p>
                 </div>
               )}
-              {historial.map((c) => (
-                <CitaCard key={c.id} cita={c} viewAs="paciente" onDescargarPDF={handleDescargarPDF} />
+              {recetas.map((c) => (
+                <CitaCard key={c.id} cita={c} viewAs="paciente" onDescargarReceta={handleDescargarReceta} />
               ))}
             </>
           )}

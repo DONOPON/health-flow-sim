@@ -22,6 +22,7 @@ function DashboardDoctor() {
   const [diagnostico, setDiagnostico] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [imagen, setImagen] = useState("");
+  const [receta, setReceta] = useState("");
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
@@ -42,11 +43,12 @@ function DashboardDoctor() {
     setDiagnostico("");
     setObservaciones("");
     setImagen("");
+    setReceta("");
   };
 
   const handleGuardar = () => {
     if (!citaSeleccionada || !diagnostico.trim()) return;
-    guardarDiagnostico(citaSeleccionada.id, diagnostico, observaciones, imagen);
+    guardarDiagnostico(citaSeleccionada.id, diagnostico, observaciones, imagen, receta);
     setCitaSeleccionada(null);
     setRefresh((r) => r + 1);
   };
@@ -119,6 +121,17 @@ function DashboardDoctor() {
                     className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     placeholder="https://ejemplo.com/radiografia.jpg"
                   />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Receta médica (visible para el paciente)</label>
+                  <textarea
+                    value={receta}
+                    onChange={(e) => setReceta(e.target.value)}
+                    rows={4}
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder="Ej: Paracetamol 500mg cada 8h por 5 días..."
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">Esta es la única información clínica que el paciente podrá ver.</p>
                 </div>
                 <button
                   onClick={handleGuardar}
