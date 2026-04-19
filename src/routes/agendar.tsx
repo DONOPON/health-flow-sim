@@ -43,6 +43,8 @@ function AgendarPage() {
     if (!s || s.rol !== "paciente") navigate({ to: "/login" });
   }, [navigate]);
 
+  const hoy = new Date().toISOString().split("T")[0];
+
   // Calcula horarios ocupados del médico en la fecha seleccionada
   const horariosOcupados = useMemo(() => {
     if (!doctorId || !fecha) return new Set<string>();
@@ -59,6 +61,14 @@ function AgendarPage() {
     );
   }, [doctorId, fecha]);
 
+  // Hora actual (HH:MM) para filtrar slots pasados si la fecha es hoy
+  const ahoraStr = useMemo(() => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }, [fecha]);
+
+  const esHoy = fecha === hoy;
+
   // Resetea hora si la fecha o el doctor cambian
   useEffect(() => {
     setHora("");
@@ -74,7 +84,9 @@ function AgendarPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!doctorId || !fecha || !hora || !motivo) return;
+    if (fecha < hoy) return;
     if (horariosOcupados.has(hora)) return;
+    if (esHoy && hora <= ahoraStr) return;
     agendarCita(sesion.id, Number(doctorId), fecha, hora, motivo);
     setExito(true);
     setTimeout(() => navigate({ to: "/dashboard-paciente" }), 2000);
@@ -132,7 +144,7 @@ function AgendarPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">Fecha *</label>
-              <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required min={new Date().toISOString().split("T")[0]} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+              <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required min={hoy} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
             </div>
 
             <div>
@@ -156,23 +168,30 @@ function AgendarPage() {
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                     {SLOTS_HORA.map((slot) => {
                       const ocupado = horariosOcupados.has(slot);
+                      const pasado = esHoy && slot <= ahoraStr;
+                      const deshabilitado = ocupado || pasado;
                       const seleccionado = hora === slot;
+                      const titulo = pasado
+                        ? "Hora ya pasada"
+                        : ocupado
+                          ? "Horario no disponible"
+                          : `Disponible: ${slot}`;
                       return (
                         <button
                           key={slot}
                           type="button"
-                          disabled={ocupado}
+                          disabled={deshabilitado}
                           onClick={() => setHora(slot)}
-                          title={ocupado ? "Horario no disponible" : `Disponible: ${slot}`}
+                          title={titulo}
                           className={
                             seleccionado
                               ? "rounded-lg border-2 border-primary bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground shadow-sm"
-                              : ocupado
+                              : deshabilitado
                                 ? "flex cursor-not-allowed items-center justify-center gap-1 rounded-lg border border-border bg-muted/50 px-2 py-2 text-xs text-muted-foreground line-through opacity-60"
                                 : "rounded-lg border border-success/40 bg-success/10 px-2 py-2 text-xs font-medium text-success transition-colors hover:border-success hover:bg-success/20"
                           }
                         >
-                          {ocupado ? (
+                          {deshabilitado ? (
                             <><Ban className="inline h-3 w-3" />{slot}</>
                           ) : (
                             slot
@@ -181,6 +200,9 @@ function AgendarPage() {
                       );
                     })}
                   </div>
+                  {esHoy && (
+                    <p className="mt-2 text-xs text-muted-foreground">Solo se muestran horas futuras del día de hoy.</p>
+                  )}
                   {hora && horariosOcupados.has(hora) && (
                     <p className="mt-2 text-xs text-destructive">Horario no disponible, elige otro.</p>
                   )}
