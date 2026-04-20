@@ -1,14 +1,20 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { LogOut, Heart, User, Stethoscope } from "lucide-react";
-import { getSesion, logout } from "@/lib/data";
+import { getSesion, logout, type Usuario } from "@/lib/data";
 import { useState, useEffect } from "react";
 
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const sesion = getSesion();
+
+  const [sesion, setSesion] = useState<Usuario | null>(null);
   const [scrolled, setScrolled] = useState(false);
+
   const isLanding = location.pathname === "/";
+
+  useEffect(() => {
+    setSesion(getSesion());
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -20,23 +26,21 @@ export function Header() {
 
   const handleLogout = () => {
     logout();
+    setSesion(null);
     navigate({ to: "/" });
   };
 
-  // Only transparent on landing page when not scrolled and not logged in
   const isTransparent = isLanding && !sesion && !scrolled;
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isTransparent
-          ? "bg-transparent"
-          : "bg-primary shadow-md"
+        isTransparent ? "bg-transparent" : "bg-primary shadow-md"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isTransparent ? "bg-white/20" : "bg-white/20"}`}>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
             <Heart className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-bold text-white">SaludDigital</span>
