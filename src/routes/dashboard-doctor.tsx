@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { getSesion, getCitas, guardarDiagnostico, getUsuarios, type Cita } from "@/lib/data";
-
+import { getSesion, getCitas, guardarDiagnostico, getUsuarios, type Cita, type Usuario } from "@/lib/data";
 import { CitaCard } from "@/components/CitaCard";
 import { Stethoscope, X, Save } from "lucide-react";
 
@@ -17,7 +16,8 @@ export const Route = createFileRoute("/dashboard-doctor")({
 
 function DashboardDoctor() {
   const navigate = useNavigate();
-  const [sesion] = useState(getSesion());
+  // ✅ FIX: null inicial, se carga en useEffect
+  const [sesion, setSesion] = useState<Usuario | null>(null);
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [diagnostico, setDiagnostico] = useState("");
   const [observaciones, setObservaciones] = useState("");
@@ -29,7 +29,9 @@ function DashboardDoctor() {
     const s = getSesion();
     if (!s || s.rol !== "doctor") {
       navigate({ to: "/login" });
+      return;
     }
+    setSesion(s);
   }, [navigate]);
 
   if (!sesion) return null;
@@ -63,7 +65,6 @@ function DashboardDoctor() {
           </p>
         </div>
 
-        {/* Stats */}
         <div className="mb-8 grid grid-cols-2 gap-4">
           <div className="health-card border border-border p-5 text-center">
             <p className="text-3xl font-bold text-primary">{pendientes.length}</p>
@@ -75,7 +76,6 @@ function DashboardDoctor() {
           </div>
         </div>
 
-        {/* Diagnosis modal */}
         {citaSeleccionada && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
             <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-xl">
@@ -146,7 +146,6 @@ function DashboardDoctor() {
           </div>
         )}
 
-        {/* Pending appointments */}
         <h2 className="mb-4 text-lg font-bold text-foreground">Citas del día</h2>
         <div className="mb-8 space-y-4">
           {pendientes.length === 0 && (
@@ -160,7 +159,6 @@ function DashboardDoctor() {
           ))}
         </div>
 
-        {/* Completed */}
         {finalizadas.length > 0 && (
           <>
             <h2 className="mb-4 text-lg font-bold text-foreground">Consultas finalizadas</h2>
