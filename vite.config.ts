@@ -6,7 +6,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig as lovableDefineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // In the Lovable sandbox we run as a TanStack Start SSR app on Cloudflare Workers.
-// For external deployments like Vercel, we build a static SPA into dist/ using base "/".
+// For local builds targeting GitHub Pages, we emit a static SPA into dist/
+// under the repository base path "/health-flow-sim/".
 const isSandbox =
   process.env.LOVABLE_SANDBOX === "1" || !!process.env.DEV_SERVER__PROJECT_PATH;
 
@@ -28,8 +29,8 @@ const sandboxConfig = lovableDefineConfig({
   plugins: sharedPlugins,
 });
 
-const staticSpaConfig = viteDefineConfig(() => ({
-  base: "/",
+const staticSpaConfig = viteDefineConfig(({ command }) => ({
+  base: command === "build" ? "/health-flow-sim/" : "/",
   plugins: [...sharedPlugins, react()],
   build: {
     outDir: "dist",
