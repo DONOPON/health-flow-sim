@@ -6,9 +6,14 @@ import { useState, useEffect } from "react";
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const sesion = getSesion();
+  const [sesion, setSesionState] = useState<ReturnType<typeof getSesion>>(null);
   const [scrolled, setScrolled] = useState(false);
   const isLanding = location.pathname === "/";
+
+  // Read session reactively whenever route changes (avoids re-reading localStorage on every render).
+  useEffect(() => {
+    setSesionState(getSesion());
+  }, [location.pathname]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -20,6 +25,7 @@ export function Header() {
 
   const handleLogout = () => {
     logout();
+    setSesionState(null);
     navigate({ to: "/" });
   };
 
