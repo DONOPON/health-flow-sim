@@ -32,13 +32,14 @@ function Index() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 7000);
-    return () => clearInterval(timer);
-  }, [nextSlide]);
+    if (!sesion) return;
+    navigate({
+      to: sesion.rol === "paciente" ? "/dashboard-paciente" : "/dashboard-doctor",
+      replace: true,
+    });
+  }, [navigate, sesion]);
 
   if (sesion) {
-    if (sesion.rol === "paciente") navigate({ to: "/dashboard-paciente" });
-    else navigate({ to: "/dashboard-doctor" });
     return null;
   }
 

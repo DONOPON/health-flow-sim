@@ -58,13 +58,12 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: {},
-    // On the server (SSR) window is undefined; use memory history there.
-    // In the browser use hash history so the static SPA on GitHub Pages works under any base path.
     history:
       typeof window === "undefined"
         ? createMemoryHistory({ initialEntries: ["/"] })
         : createHashHistory(),
     scrollRestoration: true,
+    defaultPreload: false,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
   });
