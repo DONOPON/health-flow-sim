@@ -61,7 +61,7 @@ export const getRouter = () => {
     history:
       typeof window === "undefined"
         ? createMemoryHistory({ initialEntries: ["/"] })
-        : createHashHistory(),
+        : createBrowserHistory(),
     scrollRestoration: true,
     defaultPreload: false,
     defaultPreloadStaleTime: 0,
