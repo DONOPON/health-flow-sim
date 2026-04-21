@@ -18,6 +18,9 @@ const sharedPlugins = [
     autoCodeSplitting: true,
     routesDirectory: "./src/routes",
     generatedRouteTree: "./src/routeTree.gen.ts",
+    codeSplittingOptions: {
+      addHmr: false,
+    },
   }),
   tailwindcss(),
 ];
