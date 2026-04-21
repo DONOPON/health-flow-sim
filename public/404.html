@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SaludDigital</title>
+    <script>
+      // SPA fallback for GitHub Pages with hash routing.
+      // If someone lands on /portal-salud/anything, redirect to the hash-based app.
+      (function () {
+        var base = "/portal-salud/";
+        var loc = window.location;
+        var path = loc.pathname;
+        if (path.indexOf(base) === 0) {
+          var rest = path.slice(base.length);
+          var target = loc.origin + base + (rest ? "#/" + rest.replace(/\/$/, "") : "") + loc.search + loc.hash;
+          loc.replace(target);
+        } else {
+          loc.replace("/portal-salud/");
+        }
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
