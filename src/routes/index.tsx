@@ -7,9 +7,15 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "SaludDigital - Portal de Salud Digital" },
-      { name: "description", content: "Tu portal de salud digital. Agenda citas, consulta tu historial clínico y descarga tus diagnósticos." },
+      {
+        name: "description",
+        content: "Tu portal de salud digital. Agenda citas, consulta tu historial clínico y descarga tus diagnósticos.",
+      },
       { property: "og:title", content: "SaludDigital - Portal de Salud Digital" },
-      { property: "og:description", content: "Tu portal de salud digital. Agenda citas, consulta tu historial clínico y descarga tus diagnósticos." },
+      {
+        property: "og:description",
+        content: "Tu portal de salud digital. Agenda citas, consulta tu historial clínico y descarga tus diagnósticos.",
+      },
     ],
   }),
   component: Index,
@@ -24,20 +30,30 @@ const sliderImages = [
 
 function Index() {
   const navigate = useNavigate();
-  const sesion = getSesion();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [sesion, setSesion] = useState<ReturnType<typeof getSesion>>(null);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
   }, []);
 
   useEffect(() => {
+    setSesion(getSesion());
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 7000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
+
+  useEffect(() => {
     if (!sesion) return;
+
     navigate({
       to: sesion.rol === "paciente" ? "/dashboard-paciente" : "/dashboard-doctor",
       replace: true,
     });
-  }, [navigate, sesion]);
+  }, [sesion, navigate]);
 
   if (sesion) {
     return null;
@@ -45,9 +61,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero with Image Slider */}
       <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-        {/* Slider images */}
         {sliderImages.map((src, i) => (
           <div
             key={i}
@@ -63,10 +77,8 @@ function Index() {
           </div>
         ))}
 
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/55" />
 
-        {/* Hero content */}
         <div className="relative z-10 px-4 py-24 text-center">
           <div className="mx-auto max-w-3xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm text-white backdrop-blur-sm">
@@ -97,7 +109,6 @@ function Index() {
           </div>
         </div>
 
-        {/* Slider dots */}
         <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
           {sliderImages.map((_, i) => (
             <button
@@ -112,7 +123,6 @@ function Index() {
         </div>
       </div>
 
-      {/* Stats / Trust section */}
       <div className="bg-primary px-4 py-10">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-8 sm:gap-16">
           {[
@@ -133,7 +143,6 @@ function Index() {
         </div>
       </div>
 
-      {/* Features */}
       <div className="mx-auto max-w-5xl px-4 py-16">
         <h2 className="mb-10 text-center text-2xl font-bold text-foreground">
           ¿Qué puedes hacer?
@@ -155,7 +164,6 @@ function Index() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="border-t border-border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
         <p>SaludDigital — Prototipo funcional de Portal de Salud Digital</p>
       </footer>
